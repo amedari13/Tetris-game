@@ -1,33 +1,33 @@
 ﻿#pragma once
 #include "windows.h"
-#include <vector>
 #include "Figure.h"
+#include <vector>
+#include <memory>
 
 //Field -- класс, который только хранит "стакан".умеет прибавлять фигуру, удалять,
 //сдвигать ниже, выше и проч.
-//
-//if (field->can_add(figure, x, y) { ... }
-//
-//field->add(figure, x, y);
-//field->sub(figure, x, y);
+
 class Field
 {
 public:
-	Field();
-	//Figure current_element(Field*); // неиспользуемая функция, хотя по коду должна быть такая переменная
+	Field(int, int);
+	void move_right(std::shared_ptr<Figure>, int, int);
+	void move_left(std::shared_ptr<Figure>, int, int);
+	void move_down(std::shared_ptr<Figure>, int, int);
+	void move_up(std::shared_ptr<Figure>, int, int);
+	void rotate(std::shared_ptr<Figure>, int, int);
 
-	// эти переменные почему-то не private
-	int COLS; // большие буквы обычно используются для макросов
-	int ROWS;
-	std::vector<std::vector<char>> coords;
+	bool can_insert_element(std::shared_ptr<Figure>, int x, int y);
+	void insert_element(std::shared_ptr<Figure>, int x, int y);
+	void delete_element(std::shared_ptr<Figure>, int x, int y);
 
-	Figure currentElement; // добавил 
+	void draw_field();
+	void clear_field();
+	void row_burning_check();
 
-	void createRandomFigure();
-	bool canInsertElement();
-	void insertElement();
-	void deleteElement();
-	void clearField();
-	void drawField();
+private:
+	int cols; 
+	int rows;
+	std::vector<std::vector<char>> cells;
 };
 

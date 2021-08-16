@@ -2,9 +2,21 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-Figure::Figure()
+
+int Figure::get_width()
 {
-	//random(); сделать рандомное вращение?
+	int max_x = form_coords[0].first;
+	for (auto pair : form_coords)
+		max_x = pair.first > max_x ? pair.first : max_x;
+	return max_x;
+}
+
+int Figure::get_length()
+{
+	int max_y = form_coords[0].second;
+	for (auto pair : form_coords)
+		max_y = pair.second > max_y ? pair.second : max_y;
+	return max_y;
 }
 
 std::vector<std::vector<char>> Figure::get_form()
@@ -59,6 +71,36 @@ std::vector<std::pair<int, int>> Figure::rotate()
 	return form_coords;// нужен сдвиг для избежания отрицательных чисел
 }
 
+std::vector<std::pair<int, int>> Figure::reverse_rotate()
+{
+	//x' = x*cos(a) - y*sin(a)
+	//y' = x*sin(a) + y*cos(a)
+	//получаем вектор х и у и возвращаем повернутый на 90 градусов
+	int min_x = 0, min_y = 0;
+	for (auto pair : form_coords)
+	{
+		pair.first = static_cast<int>(
+			-pair.second * sin(-90 * M_PI / 180.)
+			);
+		if (pair.first < 0 && pair.first < min_x) min_x = pair.first;
+
+		pair.second = static_cast<int>(
+			pair.first * sin(-90 * M_PI / 180.)
+			);
+
+		if (pair.second < 0 && pair.second < min_y) min_y = pair.second;
+	}
+	if (min_x < 0 || min_y < 0) //если нашли отрицательные числа-- сдвигаем фигуру
+	{
+		for (auto pair : form_coords)
+		{
+			pair.first -= min_x;
+			pair.second -= min_y;
+		}
+	}
+	return form_coords;
+}
+
 std::vector<std::pair<int, int>> Figure::random()
 {
 	//выбирает фигуру
@@ -79,13 +121,3 @@ std::vector<std::pair<int, int>> Figure::random()
 	}
 	return form_coords;//тут чета странное
 }
-enum Symbols
-{
-	right_l = 0,
-	left_l,
-	t_shaped,
-	cube,
-	right_z,
-	left_z,
-	line
-};

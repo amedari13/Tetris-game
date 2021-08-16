@@ -1,7 +1,6 @@
-﻿#include "Field.h"
+﻿#pragma once
 #include "memory"
-#include <wincrypt.h>
-#pragma once
+#include "vector"
 
 //Figure -- класс который исключительно хранит форму фигур.Тут можно использовать
 //через указатель либо по значению.В принципе должно быть так, чтобы внутри фигура могла
@@ -11,14 +10,27 @@
 //figure = Figure::random();
 //figure.rotate()
 
+enum Symbols
+{
+	right_l = 0,
+	left_l,
+	t_shaped,
+	cube,
+	right_z,
+	left_z,
+	line
+};
+
 class Figure
 {
 public:
-	Figure();
+	int get_width();
+	int get_length();
 	std::vector<std::vector<char>> get_form();//возвращает форму в виде матрицы
 	std::vector<std::pair<int, int>> rotate();//вращает фигуру
+	std::vector<std::pair<int, int>> reverse_rotate();//вращает фигуру в обратную сторону
+	std::vector<std::pair<int, int>> random();//создает рандомную фигуру
 
 private:
 	std::vector<std::pair<int, int>> form_coords;//фигура через координаты
-	std::vector<std::pair<int, int>> random();//создает рандомную фигуру
 };
