@@ -10,7 +10,7 @@
 //figure = Figure::random();
 //figure.rotate()
 
-enum Symbols
+enum class Symbols
 {
 	right_l = 0,
 	left_l,
@@ -24,13 +24,16 @@ enum Symbols
 class Figure
 {
 public:
+	Figure();
+	void random();
+
 	int get_width();
 	int get_length();
-	std::vector<std::vector<char>> get_form();//возвращает форму в виде матрицы
+	std::vector<std::pair<int, int>> get_form();
+	
 	std::vector<std::pair<int, int>> rotate();//вращает фигуру
 	std::vector<std::pair<int, int>> reverse_rotate();//вращает фигуру в обратную сторону
-	std::vector<std::pair<int, int>> random();//создает рандомную фигуру
 
 private:
-	std::vector<std::pair<int, int>> form_coords;//фигура через координаты
+	std::vector<std::pair<int, int>> form_coords;
 };

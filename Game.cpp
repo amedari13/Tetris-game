@@ -14,50 +14,7 @@ void Game::Start()
 
 	for (int counter = 0;; counter++)
 	{
-		if (!gameOver && counter % 10 == 0)
-		{
-			// если элемент существует двигаем его
-			if (inserted)
-			{
-				field->delete_element(current_figure, cx, cy); // удаляем элемент
-
-				// вот это многоуровневое обращение как бы намекает
-				// что функция занимается не своими делами
-				// то есть текущий класс Game обращается
-				// к Field который обращается к Figure который почему то помнит
-				// текущий ряд
-				field->move_down(current_figure, cx, cy); // смещаем его на одну строчку вниз
-				if (!field->can_insert_element(current_figure, cx, cy))
-				{
-					field->move_up(current_figure, cx, cy);
-					field->insert_element(current_figure, cx, cy);
-					inserted = false;//превращаем в часть стакана
-
-					field->row_burning_check();
-					continue;
-				}
-				else
-				{
-					field->insert_element(current_figure, cx, cy);
-				}
-			}
-			else
-			{
-				current_figure = std::make_shared<Figure>();
-
-				if (field->can_insert_element(current_figure, cx, cy))
-				{
-					field->insert_element(current_figure, cx, cy);
-					inserted = true;
-				}
-				else
-				{
-					gameOver = true;
-					printf("\n\t\t\t\t\tGame Over, Loser!");
-					break;
-				}
-			}
-		}
+		Proccess(counter);
 		field->draw_field();
 
 		if (!_kbhit() || gameOver)
@@ -66,7 +23,109 @@ void Game::Start()
 			continue;
 		}
 
-		int c = _getch();///////доделать
-		//Keys[c]();а вот тут уже фиг знает шо
+		int c = _getch();
+		keys[c]();
+	}
+}
+
+void Game::Proccess(int counter)
+{
+	if (!gameOver && counter % 10 == 0)
+	{
+		if (current_figure)
+		{
+			calc_cycle();
+		}
+		else
+		{
+			current_figure = std::make_shared<Figure>();
+
+			cx = 5/*rand() % field->get_cols()*/;//сомнительно, должно выбирать нормально чтоб все помещалось
+			cy = 0;
+
+			if (field->can_insert_element(current_figure, cx, cy))
+			{
+				field->insert_element(current_figure, cx, cy);
+			}
+			else
+			{
+				gameOver = true;
+				printf("\n\t\t\t\t\tGame Over, Loser!");
+			}
+		}
+	}
+}
+
+void Game::calc_cycle()
+{
+	field->erase_element(current_figure, cx, cy);
+	
+	if (field->can_insert_element(current_figure, cx, 1 + cy))
+	{
+		field->insert_element(current_figure, cx, ++cy);
+	}
+	else
+	{
+		field->insert_element(current_figure, cx, cy);
+		field->row_burning_check();
+		current_figure.reset();
+	}
+}
+
+void Game::rotate_figure()
+{
+	field->erase_element(current_figure, cx, cy);
+	current_figure->rotate();
+
+	if (field->can_insert_element(current_figure, cx, cy))
+	{
+		field->insert_element(current_figure, cx, cy);
+	}
+	else
+	{
+		current_figure->reverse_rotate();
+		field->insert_element(current_figure, cx, cy);
+	}
+}
+
+void Game::move_right()
+{
+	field->erase_element(current_figure, cx, cy);
+
+	if (field->can_insert_element(current_figure, cx + 1, cy))
+	{
+		field->insert_element(current_figure, ++cx, cy);
+	}
+	else
+	{
+		field->insert_element(current_figure, cx, cy);
+	}
+}
+
+void Game::move_left()
+{
+	field->erase_element(current_figure, cx, cy);
+	
+	if (field->can_insert_element(current_figure, cx - 1, cy))
+	{
+		field->insert_element(current_figure, --cx, cy);
+	}
+	else
+	{
+		field->insert_element(current_figure, cx, cy);
+	}
+}
+
+void Game::move_down()
+{
+	field->erase_element(current_figure, cx, cy);
+
+	if (field->can_insert_element(current_figure, cx, cy + 1))
+	{
+		field->insert_element(current_figure, cx, ++cy);
+	}
+	else
+	{
+		field->insert_element(current_figure, cx, cy);
 	}
 }

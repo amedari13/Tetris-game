@@ -11,15 +11,15 @@ class Field
 {
 public:
 	Field(int, int);
-	void move_right(std::shared_ptr<Figure>, int, int);
-	void move_left(std::shared_ptr<Figure>, int, int);
-	void move_down(std::shared_ptr<Figure>, int, int);
-	void move_up(std::shared_ptr<Figure>, int, int);
-	void rotate(std::shared_ptr<Figure>, int, int);
+	int get_cols();
+	int get_rows();
 
+	void set(int, int, char);
+	bool is_empty(int, int);
+	
 	bool can_insert_element(std::shared_ptr<Figure>, int x, int y);
 	void insert_element(std::shared_ptr<Figure>, int x, int y);
-	void delete_element(std::shared_ptr<Figure>, int x, int y);
+	void erase_element(std::shared_ptr<Figure>, int x, int y);
 
 	void draw_field();
 	void clear_field();

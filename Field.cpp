@@ -1,4 +1,5 @@
 #include "Field.h"
+
 Field::Field(int col, int row)
 {
 	cols = col;
@@ -10,47 +11,60 @@ Field::Field(int col, int row)
 	}
 }
 
-void Field::delete_element(std::shared_ptr<Figure> figure, int cx, int cy)
+int Field::get_cols()
 {
-	for (int len = 0; len < figure->get_length(); ++len)
+	return cols;
+}
+
+int Field::get_rows()
+{
+	return rows;
+}
+
+void Field::set(int x, int y, char elem)
+{
+	cells[y][x] = elem;
+}
+
+bool Field::is_empty(int x, int y)
+{
+	return cells[y][x] == 0 ? true : false;
+}
+
+bool Field::can_insert_element(std::shared_ptr<Figure> figure, int cx, int cy)
+{
+	for (std::pair<int, int> pair : figure->get_form())
 	{
-		for (int wid = 0; wid < figure->get_width(); ++wid)
-		{
-			int rr = len + cy;
-			int cc = wid + cx;
+		int cc = pair.first + cx;
+		int rr = pair.second + cy;
+		// проверяем, что координаты в пределах экрана
+		if (cc < 0 || cc >= cols)
+			return false;
+		if (rr < 0 || rr >= rows)
+			return false;
 
-			if (figure->get_form()[len][wid])
-				cells[rr][cc] = 0;
-		}
+		if (!is_empty(cc, rr))
+			return false;
+	}
+	return true;
+}
+
+void Field::insert_element(std::shared_ptr<Figure> figure, int cx, int cy)
+{
+	for (std::pair<int, int> pair : figure->get_form())
+	{
+		set(pair.first + cx, pair.second + cy, 1);
 	}
 }
 
-//готовые 
-void Field::clear_field()
+void Field::erase_element(std::shared_ptr<Figure> figure, int cx, int cy)
 {
-	for (int r = 0; r < rows; ++r)
-		for (int c = 0; c < cols; ++c)
-			cells[r][c] = 0;
-}
-
-void Field::row_burning_check()//переделать логику --> пропускает некоторые ряды из-за сдвига вниз
-{
-	for (int r = rows - 1; r >= 0; --r) {
-		//проверяем ряды на заполенность
-		int z = 0;
-		for (int c = 0; c < cols; ++c)
-			if (cells[r][c] == 1)
-				z++;
-		//если нашли ряд то сжигаем его и сдвигаем все содержимое вниз
-		if (z == cols) {
-			for (int c = 0; c < cols; ++c)
-				cells[r][c] = 0;
-			for (int r0 = r; r0 > 0; r0--)
-				for (int c = 0; c < cols; ++c)
-					cells[r0][c] = cells[r0 - 1][c];
-		}z = 0;
+	for (std::pair<int, int> pair : figure->get_form())
+	{
+		set(pair.first + cx, pair.second + cy, 0);
 	}
 }
+
 void Field::draw_field()
 {
 	// получаем хэндл консоли
@@ -90,109 +104,30 @@ void Field::draw_field()
 	printf("\xD9");
 }
 
-//под вопросом
-bool Field::can_insert_element(std::shared_ptr<Figure> figure, int cx, int cy)
+void Field::clear_field()
 {
-	for (int len = 0; len < figure->get_length(); ++len)//проходим по матрице тетрино
-	{
-		for (int wid = 0; wid < figure->get_width(); ++wid)
-		{
-			int rr = len + cy;//границы тетрино
-			int cc = wid + cx;
-
-			if (figure->get_form()[len][wid] == 0)
-				continue;
-
-			// проверяем, что координаты в пределах экрана
-			if (rr < 0 || rr >= rows)
-				return false;
-			if (cc < 0 || cc >= cols)
-				return false;
-
-			// проверяем, что ячейка не занята
-			if (cells[rr][cc])
-				return false;
-		}
-	}
-	return true;
+	for (int r = 0; r < rows; r++)
+		for (int c = 0; c < cols; c++)
+			cells[r][c] = 0;
 }
 
-void Field::move_right(std::shared_ptr<Figure> figure, int cx, int cy)
+void Field::row_burning_check()//переделать логику --> пропускает некоторые ряды из-за сдвига вниз
 {
-	delete_element(figure, cx, cy);//удаляем ис прошлого места
-	cx++;//увеличиваем текущие координаты по столбцу на 1
-	if (!can_insert_element(figure, cx, cy))
-	{
-		cx--;
-		insert_element(figure, cx, cy);
-	}
-	else
-		insert_element(figure, cx, cy);
-}
-
-void Field::move_left(std::shared_ptr<Figure> figure, int cx, int cy)
-{
-	delete_element(figure, cx, cy);
-	cx--;
-	if (!can_insert_element(figure, cx, cy)) {
-		cx++;
-		insert_element(figure, cx, cy);
-	}
-	else
-		insert_element(figure, cx, cy);
-
-}
-
-void Field::move_down(std::shared_ptr<Figure> figure, int cx, int cy)
-{
-	delete_element(figure, cx, cy);
-	cy++;
-	if (!can_insert_element(figure, cx, cy)) {
-		cy--;
-		insert_element(figure, cx, cy);
-	}
-	else
-		insert_element(figure, cx, cy);
-}
-
-void Field::move_up(std::shared_ptr<Figure> figure, int cx, int cy)
-{
-	delete_element(figure, cx, cy);
-	cy--;
-	if (!can_insert_element(figure, cx, cy)) {
-		cy++;
-		insert_element(figure, cx, cy);
-	}
-	else
-		insert_element(figure, cx, cy);
-}
-
-void Field::rotate(std::shared_ptr<Figure> figure, int cx, int cy)
-{
-	delete_element(figure, cx, cy);
-	figure->rotate();
-	if (!can_insert_element(figure, cx, cy))
-	{
-		figure->reverse_rotate();
-		insert_element(figure, cx, cy);
-	}
-	else
-	{
-		insert_element(figure, cx, cy);
-	}
-}
-
-void Field::insert_element(std::shared_ptr<Figure> figure, int cx, int cy)
-{
-	for (int len = 0; len < figure->get_length(); ++len)
-	{
-		for (int wid = 0; wid < figure->get_width(); ++wid)
-		{
-			int rr = len + cy;
-			int cc = wid + cx;
-
-			if (figure->get_form()[len][wid])
-				cells[rr][cc] = 1;
-		}
+	for (int r = rows - 1; r >= 0; --r) {
+		//проверяем ряды на заполенность
+		int z = 0;
+		for (int c = 0; c < cols; ++c)
+			if (cells[r][c] == 1)
+				z++;
+		//если нашли ряд то сжигаем его и сдвигаем все содержимое вниз
+		if (z == cols) {
+			for (int c = 0; c < cols; ++c)
+				cells[r][c] = 0;
+			for (int r0 = r; r0 > 0; r0--)
+				for (int c = 0; c < cols; ++c)
+					cells[r0][c] = cells[r0 - 1][c];
+			//вот тут вставленно новое
+			r++;
+		}z = 0;
 	}
 }

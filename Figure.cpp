@@ -2,6 +2,31 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+Figure::Figure() 
+{
+	form_coords.resize(5);
+	random();
+}
+
+void Figure::random()
+{
+	//выбирает фигуру
+	//возвращает все в координатах
+	Symbols current_symbol = static_cast<Symbols>(rand() % 7);
+	//теперь эти данные надо преобразовать в вектор пар кординат
+	//сначала символ
+	switch (current_symbol)
+	{
+	case Symbols::t_shaped:  form_coords = { {0,0}, {1,0}, {2,0}, {1,1} }; break;
+	case Symbols::right_l:   form_coords = { {0,0}, {1,0}, {0,1}, {0,2} }; break;
+	case Symbols::right_z:   form_coords = { {0,0}, {1,0}, {1,1}, {2,1} }; break;
+	case Symbols::left_l:    form_coords = { {0,0}, {0,1}, {0,2}, {1,2} }; break;
+	case Symbols::left_z:    form_coords = { {0,1}, {1,1}, {1,0}, {2,0} }; break;
+	case Symbols::cube:      form_coords = { {0,0}, {0,1}, {1,0}, {1,1} }; break;
+	case Symbols::line:      form_coords = { {0,0}, {0,1}, {0,2}, {0,3} }; break;
+	default: form_coords = { {0,0}, {0,1}, {0,2}, {0,3} }; break;
+	}
+}
 
 int Figure::get_width()
 {
@@ -19,26 +44,9 @@ int Figure::get_length()
 	return max_y;
 }
 
-std::vector<std::vector<char>> Figure::get_form()
+std::vector<std::pair<int, int>> Figure::get_form()
 {
-	int max_x = form_coords[0].first;//ищем максимальные значения по x и у для постройки матрицы тетрино
-	int max_y = form_coords[0].second;
-	for (auto pair : form_coords) 
-	{
-		max_x = pair.first > max_x ? pair.first : max_x;
-		max_y = pair.second > max_y ? pair.second : max_y;
-	}
-	std::vector<std::vector<char>> form;
-	//задаем рзмерность массива и заполняем нулями
-	form.resize(max_x);
-	for (int i = 0; i < max_x; ++i)
-		form[i].resize(max_y, 0);
-	
-	for (auto pair : form_coords) //по координатам из пары находим в новой матрице квадратик и закрашиваем
-	{
-		form[pair.first][pair.second] = 1;
-	}
-	return form;
+	return form_coords;
 }
 
 std::vector<std::pair<int, int>> Figure::rotate()
@@ -47,7 +55,7 @@ std::vector<std::pair<int, int>> Figure::rotate()
 	//y' = x*sin(a) + y*cos(a)
 	//получаем вектор х и у и возвращаем повернутый на 90 градусов
 	int min_x = 0, min_y = 0;
-	for (auto pair : form_coords) 
+	for (auto& pair : form_coords) 
 	{
 		pair.first = static_cast<int>(
 			 - pair.second * sin(90 * M_PI / 180.)
@@ -62,13 +70,13 @@ std::vector<std::pair<int, int>> Figure::rotate()
 	}
 	if (min_x < 0 || min_y < 0) //если нашли отрицательные числа-- сдвигаем фигуру
 	{
-		for (auto pair : form_coords) 
+		for (auto& pair : form_coords) 
 		{
 			pair.first -= min_x;
 			pair.second -= min_y;
 		}
 	}
-	return form_coords;// нужен сдвиг для избежания отрицательных чисел
+	return form_coords;
 }
 
 std::vector<std::pair<int, int>> Figure::reverse_rotate()
@@ -77,7 +85,7 @@ std::vector<std::pair<int, int>> Figure::reverse_rotate()
 	//y' = x*sin(a) + y*cos(a)
 	//получаем вектор х и у и возвращаем повернутый на 90 градусов
 	int min_x = 0, min_y = 0;
-	for (auto pair : form_coords)
+	for (auto& pair : form_coords)
 	{
 		pair.first = static_cast<int>(
 			-pair.second * sin(-90 * M_PI / 180.)
@@ -92,32 +100,11 @@ std::vector<std::pair<int, int>> Figure::reverse_rotate()
 	}
 	if (min_x < 0 || min_y < 0) //если нашли отрицательные числа-- сдвигаем фигуру
 	{
-		for (auto pair : form_coords)
+		for (auto& pair : form_coords)
 		{
 			pair.first -= min_x;
 			pair.second -= min_y;
 		}
 	}
 	return form_coords;
-}
-
-std::vector<std::pair<int, int>> Figure::random()
-{
-	//выбирает фигуру
-	//возвращает все в координатах
-	Symbols current_symbol = static_cast<Symbols>(rand() % 7);
-	//теперь эти данные надо преобразовать в вектор пар кординат
-	//сначала символ
-	switch (current_symbol)
-	{
-	case t_shaped:  form_coords = { {0,0}, {1,0}, {2,0}, {1,1} }; break;
-	case right_l:   form_coords = { {0,0}, {1,0}, {0,1}, {0,2} }; break;
-	case right_z:   form_coords = { {0,0}, {1,0}, {1,1}, {2,1} }; break;
-	case left_l:    form_coords = { {0,0}, {0,1}, {0,2}, {1,2} }; break;
-	case left_z:    form_coords = { {0,1}, {1,1}, {1,0}, {2,0} }; break;
-	case cube:      form_coords = { {0,0}, {0,1}, {1,0}, {1,1} }; break;
-	case line:      form_coords = { {0,0}, {0,1}, {0,2}, {0,3} }; break;
-	default: throw _EXCEPTION_;
-	}
-	return form_coords;//тут чета странное
 }
