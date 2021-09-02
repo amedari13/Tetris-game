@@ -23,8 +23,12 @@ void Game::Start()
 			continue;
 		}
 
-		int c = _getch();
-		keys[c]();
+		if (current_figure) 
+		{
+			int c = _getch();
+			if (keys[c] || static_cast<int>(c) == -32)
+				keys[c]();
+		}
 	}
 }
 
@@ -40,7 +44,7 @@ void Game::Proccess(int counter)
 		{
 			current_figure = std::make_shared<Figure>();
 
-			cx = 5/*rand() % field->get_cols()*/;//сомнительно, должно выбирать нормально чтоб все помещалось
+			cx = field->get_cols() / 2;
 			cy = 0;
 
 			if (field->can_insert_element(current_figure, cx, cy))

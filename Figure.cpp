@@ -10,11 +10,7 @@ Figure::Figure()
 
 void Figure::random()
 {
-	//выбирает фигуру
-	//возвращает все в координатах
 	Symbols current_symbol = static_cast<Symbols>(rand() % 7);
-	//теперь эти данные надо преобразовать в вектор пар кординат
-	//сначала символ
 	switch (current_symbol)
 	{
 	case Symbols::t_shaped:  form_coords = { {0,0}, {1,0}, {2,0}, {1,1} }; break;
@@ -57,13 +53,14 @@ std::vector<std::pair<int, int>> Figure::rotate()
 	int min_x = 0, min_y = 0;
 	for (auto& pair : form_coords) 
 	{
+		int x = pair.first; int y = pair.second;
 		pair.first = static_cast<int>(
-			 - pair.second * sin(90 * M_PI / 180.)
+			 - y * sin(90. * M_PI / 180.)
 			);
 		if (pair.first < 0 && pair.first < min_x) min_x = pair.first;
 
 		pair.second = static_cast<int>(
-			pair.first * sin(90 * M_PI / 180.)
+			x * sin(90. * M_PI / 180.)
 			);
 
 		if (pair.second < 0 && pair.second < min_y) min_y = pair.second;
@@ -81,24 +78,22 @@ std::vector<std::pair<int, int>> Figure::rotate()
 
 std::vector<std::pair<int, int>> Figure::reverse_rotate()
 {
-	//x' = x*cos(a) - y*sin(a)
-	//y' = x*sin(a) + y*cos(a)
-	//получаем вектор х и у и возвращаем повернутый на 90 градусов
 	int min_x = 0, min_y = 0;
 	for (auto& pair : form_coords)
 	{
+		int x = pair.first; int y = pair.second;
 		pair.first = static_cast<int>(
-			-pair.second * sin(-90 * M_PI / 180.)
+			-y * sin(-90 * M_PI / 180.)
 			);
 		if (pair.first < 0 && pair.first < min_x) min_x = pair.first;
 
 		pair.second = static_cast<int>(
-			pair.first * sin(-90 * M_PI / 180.)
+			x * sin(-90 * M_PI / 180.)
 			);
 
 		if (pair.second < 0 && pair.second < min_y) min_y = pair.second;
 	}
-	if (min_x < 0 || min_y < 0) //если нашли отрицательные числа-- сдвигаем фигуру
+	if (min_x < 0 || min_y < 0) 
 	{
 		for (auto& pair : form_coords)
 		{
